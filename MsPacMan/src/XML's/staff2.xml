@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<company>
+	<staff id="1001">
+		<currState>chase</currState>
+		<evt>toofar</evt>
+		<newState>wander</newState>
+	</staff>
+	<staff id="2001">
+		<currState>wander</currState>
+		<evt>close</evt>
+		<newState>chase</newState>
+	</staff>
+</company>

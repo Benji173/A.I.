@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<states>
+	<currState name="chase">
+		<evt name = "toofar">
+			<newState>wander</newState>
+		</evt>
+	</currState>
+	<currState name = "runaway">
+		<evt name ="">
+			<newState></newState>
+		</evt>
+	</currState>
+	<currState name = "scatter">
+			<evt name = "close">
+				<newState>Wrong</newState>
+			</evt>
+			<evt name= "close">
+				<newState>Right</newState>
+			</evt>
+	</currState>
+</states>
