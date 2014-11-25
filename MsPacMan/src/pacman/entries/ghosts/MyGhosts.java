@@ -69,6 +69,7 @@ public class MyGhosts extends Controller<EnumMap<GHOST,MOVE>>
 		for(GHOST ghost : GHOST.values())				//for each ghost
 			if(game.doesGhostRequireAction(ghost))		//if it requires an action
 			{	
+				int d = game.getManhattanDistance(game.getGhostCurrentNodeIndex(ghost),game.getPacmanCurrentNodeIndex());
 				if(game.getManhattanDistance(game.getGhostCurrentNodeIndex(ghost), game.getPacmanCurrentNodeIndex())< 50){
 					myMoves.put(ghost,game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
 							game.getPacmanCurrentNodeIndex(),game.getGhostLastMoveMade(ghost),DM.PATH));
