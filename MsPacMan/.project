@@ -14,4 +14,11 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>src/XML&apos;s/FSM.xml</name>
+			<type>1</type>
+			<location>C:/Users/lab422/Desktop/A.I/MsPacMan/src/XML&apos;s/FSM.xml</location>
+		</link>
+	</linkedResources>
 </projectDescription>
