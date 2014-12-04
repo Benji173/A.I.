@@ -13,7 +13,7 @@ public class Legacy2TheReckoning extends Controller<EnumMap<GHOST,MOVE>>
 {
 	public static final int CROWDED_DISTANCE=30;
 	public static final int PACMAN_DISTANCE=10;
-    public static final int PILL_PROXIMITY=15;
+    public static final int PILL_PROXIMITY=20;
     private final EnumMap<GHOST,MOVE> myMoves=new EnumMap<GHOST,MOVE>(GHOST.class);
     private final EnumMap<GHOST,Integer> cornerAllocation=new EnumMap<GHOST,Integer>(GHOST.class);
     

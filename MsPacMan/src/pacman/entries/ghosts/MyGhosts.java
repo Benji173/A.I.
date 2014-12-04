@@ -7,6 +7,7 @@ import java.util.Random;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -23,11 +24,11 @@ import pacman.game.Game;
  * be placed in this package or sub-packages (e.g., game.entries.ghosts.mypackage).
  */
 public class MyGhosts extends Controller<EnumMap<GHOST, MOVE>> {
-	public static final int CROWDED_DISTANCE = 30;
-	public static final int PACMAN_DISTANCE = 10;
-	public static final int PILL_PROXIMITY = 15;
+	public static final int CROWDED_DISTANCE = 40;
+	public static final int PACMAN_DISTANCE = 20;
+	public static final int PILL_PROXIMITY = 20;
 
-	private final static float CONSISTENCY = 1.0f; // carry out intended move
+	private final static float CONSISTENCY=0.9f; // carry out intended move
 													// with this probability
 	private Random rnd = new Random();
 	private EnumMap<GHOST, MOVE> myMoves = new EnumMap<GHOST, MOVE>(GHOST.class);
@@ -55,11 +56,11 @@ public class MyGhosts extends Controller<EnumMap<GHOST, MOVE>> {
 		try {
 
 			File fXmlFile = new File(
-					"C:/Users/lab422/Desktop/A.I/MsPacMan/src/XML's/FSM.xml");
+					"XML's/FSM.xml");
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			org.w3c.dom.Document doc = dBuilder.parse(fXmlFile);
+			Document doc = dBuilder.parse(fXmlFile);
 
 			(doc).getDocumentElement().normalize();
 
@@ -91,48 +92,168 @@ public class MyGhosts extends Controller<EnumMap<GHOST, MOVE>> {
 		
 		int pacmanIndex=game.getPacmanCurrentNodeIndex();
 		
+		 int pacmanDirectionNode = game.getNeighbour(game.getPacmanCurrentNodeIndex(), game.getPacmanLastMoveMade());
+         int oldPacmanDirectionNode =pacmanDirectionNode;
+         try{
+                 while(!game.isJunction(pacmanDirectionNode)){
+                                 oldPacmanDirectionNode = pacmanDirectionNode;
+                         pacmanDirectionNode = game.getNeighbour(pacmanDirectionNode, game.getPacmanLastMoveMade());                            
+                 }
+         }
+         catch(Exception e){
+                 pacmanDirectionNode = oldPacmanDirectionNode;
+         }
+		
 		for (GHOST ghost : GHOST.values())
 			// for each ghost
 			if (game.doesGhostRequireAction(ghost)) // if it requires an action
 			{
 				int currentIndex=game.getGhostCurrentNodeIndex(ghost);
-				//if crowed and not close to pacman, disperse
-				if(myAction.equals("disperse"))
-        			myMoves.put(ghost,getRetreatActions(game,ghost));                          				//go towards the power pill locations
-        		//if edible or Ms Pac-Man is close to power pill, move away from Ms Pac-Man
-        		else if(myAction.equals("close"))
-        			myMoves.put(ghost,game.getApproximateNextMoveAwayFromTarget(currentIndex,pacmanIndex,game.getGhostLastMoveMade(ghost),DM.PATH));      			//move away from ms pacman
-        		//else go towards Ms Pac-Man
-        		else if( myAction.equals("chase"))      		
-        			myMoves.put(ghost,game.getApproximateNextMoveTowardsTarget(currentIndex,pacmanIndex,game.getGhostLastMoveMade(ghost),DM.PATH));
 				
-				if(isCrowded(game) && !closeToMsPacMan(game,currentIndex)){
+				// events
+				
+				if(game.getGhostEdibleTime(ghost)<=0)
+					myEvent ="none";
+				
+				if(game.getGhostEdibleTime(ghost)>0)
+					myEvent = "edible";
+				
+				
+				else if(closerToPower(game,ghost))
+					myEvent = "closer";
+				
+				else if(closeToPower(game,ghost))
+					myEvent = "close";
+				
+				
+				else if(isCrowded(game) && !closeToMsPacMan(game,currentIndex))
 					myEvent = "crowed and not close";
-				}
-				else if(game.getGhostEdibleTime(ghost)>0 || closeToPower(game)){
-					myEvent = "edible or close";
-				}
-				else if(myState == "runaway" && game.getGhostEdibleTime(ghost)==0){
-					myEvent = "not edible";
-				}
-				else
+				
+				
+				else 	
 					myEvent = "none";
+				
+				
+				
+				//Actions
+				
+				// disperse
+				if(myAction.equals("disperse"))
+        			myMoves.put(ghost,getRetreatActions(game,ghost)); //go towards the power pill locations
+				
+				
+				
+				else if(myAction.equals("get pill")){
+					myMoves.put(ghost, game.getApproximateNextMoveTowardsTarget(currentIndex, game.getPillIndex(getNearestPill(game, currentIndex)), 
+							game.getGhostLastMoveMade(ghost),DM.PATH));
+				}
+				
+				
+        		if(myAction.equals("runaway"))
+        			myMoves.put(ghost,game.getApproximateNextMoveAwayFromTarget(currentIndex,pacmanIndex,game.getGhostLastMoveMade(ghost),DM.PATH));      			//move away from ms pacman
+        		
+				
+				//else chase
+        		else //if( myAction.equals("chase"))      		
+        			myMoves.put(ghost,game.getApproximateNextMoveTowardsTarget(currentIndex,pacmanDirectionNode,game.getGhostLastMoveMade(ghost),DM.PATH));
+        		
+        		
+        		
+				if(ghost.equals(GHOST.BLINKY) && game.getGhostEdibleTime(ghost)<0 )
+					myMoves.put(ghost,game.getApproximateNextMoveTowardsTarget(currentIndex,pacmanDirectionNode,game.getGhostLastMoveMade(ghost),DM.PATH));
+				
+				if(ghost.equals(GHOST.BLINKY)){
+					//System.out.println("Action " + myAction);
+					//System.out.println("Event " + myEvent);
+				}
 			}
 
 		return myMoves;
 	}
 
-	private boolean closeToPower(Game game) {
+	private boolean closerToPower(Game game, GHOST ghost) {
+		int ghostIndex = game.getGhostCurrentNodeIndex(ghost);
+		//get pacman index
 		int pacmanIndex = game.getPacmanCurrentNodeIndex();
+		// create power pill indices
 		int[] powerPillIndices = game.getActivePowerPillsIndices();
+		
+		if (powerPillIndices.length > 0) {
+			// get nearest pill to ghost
+			int index = getNearestPill(game, ghostIndex);
+			// get distance to nearest pill
+			int closest = (game.getShortestPathDistance(
+					powerPillIndices[index], ghostIndex));
 
-		for (int i = 0; i < powerPillIndices.length; i++)
-			if (game.getShortestPathDistance(powerPillIndices[i], pacmanIndex) < PILL_PROXIMITY)
+			if (game.getShortestPathDistance(powerPillIndices[index],
+					pacmanIndex) < PILL_PROXIMITY
+					&& closest < game.getShortestPathDistance(
+							powerPillIndices[index], pacmanIndex))
 				return true;
 
+		}
 		return false;
 	}
+	
+	private boolean closeToPower(Game game, GHOST ghost) {
+		//get ghost index
+		int ghostIndex = game.getGhostCurrentNodeIndex(ghost);
+		//get pacman index
+		int pacmanIndex = game.getPacmanCurrentNodeIndex();
+		// create power pill indices
+		int[] powerPillIndices = game.getActivePowerPillsIndices();
+		if (powerPillIndices.length > 0) {
+			// get nearest pill
+			int index = getNearestPill(game, ghostIndex);
 
+			int closest = (game.getShortestPathDistance(
+					powerPillIndices[index], ghostIndex));
+			if (game.getShortestPathDistance(powerPillIndices[index],
+					pacmanIndex) < closest
+					&& game.getShortestPathDistance(powerPillIndices[index],
+							pacmanIndex) < PILL_PROXIMITY)
+				return true;
+		}
+		return false;
+	}
+	
+	private int getNearestPill(Game game,int index){
+		int node = 0;
+		int[] powerPillIndices = game.getActivePowerPillsIndices();
+		//if there are sill pills left
+		if(powerPillIndices.length > 0) {
+			//init closest
+			int closest = game.getShortestPathDistance(powerPillIndices[0],
+					index);
+			
+			// for all active power pills
+			for (int i = 0; i < powerPillIndices.length; i++) {
+				//if there is a closer power pill
+				if (closest >= game.getShortestPathDistance(powerPillIndices[i],
+						index)) {
+					// store index of the closest pill
+					closest = game.getShortestPathDistance(powerPillIndices[i],
+							index);
+					node = i;
+				}
+			}
+		}
+		
+		return node;
+	}
+	
+	private boolean PacmanToPower(Game game)
+    {
+		int pacmanIndex=game.getPacmanCurrentNodeIndex();
+    	int[] powerPillIndices=game.getActivePowerPillsIndices();
+    	
+    	for(int i=0;i<powerPillIndices.length;i++)
+    		if(game.getShortestPathDistance(powerPillIndices[i],pacmanIndex)<PILL_PROXIMITY)
+    			return true;
+
+        return false;
+    }
+	
 	private boolean closeToMsPacMan(Game game, int location) {
 		if (game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(),
 				location) < PACMAN_DISTANCE)
