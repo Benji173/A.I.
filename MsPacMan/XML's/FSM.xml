@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<company>
+	<FSM id="1">
+		<currState>chase</currState>
+		<evt>crowed and not close</evt>
+		<action>disperse</action>
+		<newState>chase</newState>
+	</FSM>
+	<FSM id="2">
+		<currState>chase</currState>
+		<evt>edible</evt>
+		<action>runaway</action>
+		<newState>runaway</newState>
+	</FSM>
+	<FSM id="3">
+		<currState>chase</currState>
+		<evt>none</evt>
+		<action>chase</action>
+		<newState>chase</newState>
+	</FSM>
+	<FSM id="4">
+		<currState>chase</currState>
+		<evt>close</evt>
+		<action>runaway</action>
+		<newState>runaway</newState>
+	</FSM>
+	<FSM id="5">
+		<currState>chase</currState>
+		<evt>closer</evt>
+		<action>get pill</action>
+		<newState>chase</newState>
+	</FSM>
+	<FSM id="6">
+		<currState>runaway</currState>
+		<evt>none</evt>
+		<action>chase</action>
+		<newState>chase</newState>
+	</FSM>
+	<FSM id="7">
+		<currState>runaway</currState>
+		<evt>crowed and not close</evt>
+		<action>chase</action>
+		<newState>chase</newState>
+	</FSM>
+</company>

@@ -63,7 +63,7 @@ public class Executor
 		boolean visual=true;
 		//exec.runGameTimed(new StarterPacMan(),new MyGhosts(),visual);
 		//exec.runGameTimed(new RandomPacMan(),new AggressiveGhosts(),visual);
-		//exec.runGameTimed(new HumanController(new KeyBoardInput()),new StarterGhosts(),visual);	
+		//exec.runGameTimed(new HumanController(new KeyBoardInput()),new MyGhosts(),visual);	
 		//*/
 		
 		/*

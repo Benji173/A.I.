@@ -28,13 +28,9 @@ public class MyGhosts extends Controller<EnumMap<GHOST, MOVE>> {
 	public static final int PACMAN_DISTANCE = 20;
 	public static final int PILL_PROXIMITY = 20;
 
-	private final static float CONSISTENCY=0.9f; // carry out intended move
-													// with this probability
-	private Random rnd = new Random();
 	private EnumMap<GHOST, MOVE> myMoves = new EnumMap<GHOST, MOVE>(GHOST.class);
 	private final EnumMap<GHOST, Integer> cornerAllocation = new EnumMap<GHOST, Integer>(
 			GHOST.class);
-	private MOVE[] moves = MOVE.values();
 	private String myState = "chase";
 	private String myEvent = "none";
 	private String myAction = "chase";
@@ -142,8 +138,7 @@ public class MyGhosts extends Controller<EnumMap<GHOST, MOVE>> {
         			myMoves.put(ghost,getRetreatActions(game,ghost)); //go towards the power pill locations
 				
 				
-				
-				else if(myAction.equals("get pill")){
+				if(myAction.equals("get pill")){
 					myMoves.put(ghost, game.getApproximateNextMoveTowardsTarget(currentIndex, game.getPillIndex(getNearestPill(game, currentIndex)), 
 							game.getGhostLastMoveMade(ghost),DM.PATH));
 				}
@@ -152,20 +147,10 @@ public class MyGhosts extends Controller<EnumMap<GHOST, MOVE>> {
         		if(myAction.equals("runaway"))
         			myMoves.put(ghost,game.getApproximateNextMoveAwayFromTarget(currentIndex,pacmanIndex,game.getGhostLastMoveMade(ghost),DM.PATH));      			//move away from ms pacman
         		
-				
-				//else chase
-        		else //if( myAction.equals("chase"))      		
+        		
+				else //if( myAction.equals("chase"))      		
         			myMoves.put(ghost,game.getApproximateNextMoveTowardsTarget(currentIndex,pacmanDirectionNode,game.getGhostLastMoveMade(ghost),DM.PATH));
-        		
-        		
-        		
-				if(ghost.equals(GHOST.BLINKY) && game.getGhostEdibleTime(ghost)<0 )
-					myMoves.put(ghost,game.getApproximateNextMoveTowardsTarget(currentIndex,pacmanDirectionNode,game.getGhostLastMoveMade(ghost),DM.PATH));
 				
-				if(ghost.equals(GHOST.BLINKY)){
-					//System.out.println("Action " + myAction);
-					//System.out.println("Event " + myEvent);
-				}
 			}
 
 		return myMoves;
